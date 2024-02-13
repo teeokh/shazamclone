@@ -192,4 +192,4 @@ pyrightconfig.json
 
 
 #ProjectSpecific
-.output.wav/
+output.wav/
