@@ -1,6 +1,6 @@
 #Capturing audio recording
 
-def recordAudio():
+def recordAudio(seconds):
     import pyaudio 
     import wave
 
@@ -8,7 +8,7 @@ def recordAudio():
     FORMAT = pyaudio.paInt16
     CHANNELS = 1
     RATE = 44100
-    RECORD_SECONDS = 3
+    RECORD_SECONDS = seconds
     filename = 'output.wav'
 
     p = pyaudio.PyAudio()

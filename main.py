@@ -1,3 +1,3 @@
 from recordAudio import recordAudio
 
-recordAudio()
+recordAudio(10)
