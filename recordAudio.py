@@ -3,6 +3,7 @@
 def recordAudio(seconds):
     import pyaudio 
     import wave
+    import time
 
     CHUNK = 1024
     FORMAT = pyaudio.paInt16
@@ -24,9 +25,13 @@ def recordAudio(seconds):
     
     frames = [] # Will hold the byte data for the recording
 
-    for i in range(0, RATE // CHUNK * RECORD_SECONDS):  # From 0 -> number of chunks
+    for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):  # From 0 -> number of chunks
+        if i % (RATE // CHUNK) == 0:
+            seconds_left = RECORD_SECONDS - (i // (RATE // CHUNK))
+            print(f'Time remaining: {seconds_left}')
         data = stream.read(CHUNK)
         frames.append(data)  # Reads the data for each chunk (in total of 3 seconds recording), and adds it to the frames array
+        print
 
     stream.stop_stream() 
     stream.close() # Stops and closes stream
