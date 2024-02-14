@@ -1,3 +1,5 @@
+import numpy as np
+
 #Capturing audio recording
 
 def recordAudio(seconds):
@@ -23,15 +25,18 @@ def recordAudio(seconds):
                     frames_per_buffer=CHUNK,
                     input=True)
     
-    frames = [] # Will hold the byte data for the recording
+    frames_list = []
 
     for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):  # From 0 -> number of chunks
         if i % (RATE // CHUNK) == 0:
             seconds_left = RECORD_SECONDS - (i // (RATE // CHUNK))
             print(f'Time remaining: {seconds_left}')
         data = stream.read(CHUNK)
-        frames.append(data)  # Reads the data for each chunk (in total of 3 seconds recording), and adds it to the frames array
-        print
+        frames_list.append(data)
+    
+    byte_frames = b''.join(frames_list) # Converts the frames list into bytes object
+    np_frames = np.frombuffer(byte_frames, dtype=np.int16) # Converts bytes object into np array (for input into FFT)
+        
 
     stream.stop_stream() 
     stream.close() # Stops and closes stream
@@ -46,5 +51,10 @@ def recordAudio(seconds):
     wf.setnchannels(CHANNELS)
     wf.setframerate(RATE)
     wf.setsampwidth(p.get_sample_size(FORMAT))
-    wf.writeframes(b''.join(frames))
+    wf.writeframes(byte_frames) # Needs to be bytes (readable buffer as input)
     wf.close()
+
+    print(np_frames.shape[0])
+    return np_frames
+
+    # Minor discrepancy in number of frames recorded - 44032 frames for a 44100 sr over 1 second
