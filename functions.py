@@ -1,7 +1,7 @@
 import numpy as np
 import pyaudio 
 import wave
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt 
 
 # Instance variables
 
@@ -12,9 +12,9 @@ RATE = 44100
 filename = 'output.wav'
 
 
-#Capturing audio recording
+#Capture audio recording
 
-def recordAudio(seconds):
+def record_audio(seconds):
 
     RECORD_SECONDS = seconds
 
@@ -39,10 +39,10 @@ def recordAudio(seconds):
         frames_list.append(data)
     
     byte_frames = b''.join(frames_list) # Converts the frames list into bytes object
-    np_frames = np.frombuffer(byte_frames, dtype=np.int16) # Converts bytes object into np array (for input into FFT)
+    frames_array = np.frombuffer(byte_frames, dtype=np.int16) # Converts bytes object into np array (for input into FFT)
     
-    duration = len(np_frames) / RATE
-    time = np.linspace(0, duration, num=len(np_frames))
+    duration = len(frames_array) / RATE
+    time = np.linspace(0, duration, num=len(frames_array))
 
     stream.stop_stream() 
     stream.close() # Stops and closes stream
@@ -61,27 +61,62 @@ def recordAudio(seconds):
     wf.close()
     '''
     
-    return np_frames, RATE, time
+    return frames_array, RATE, time, CHUNK
 
     # Minor discrepancy in number of frames recorded - 44032 frames for a 44100 sr over 1 second
 
 
-# Function for export and playing back audio
+# Export and playback audio
 
-def playbackAudio(np_frames, RATE):
+def playback_audio(array, sample_rate):
 
     with wave.open('output.wav', 'wb') as wf:
         wf.setnchannels(1)
         wf.setsampwidth(2)
-        wf.setframerate(RATE)
-        wf.writeframes(np_frames.tobytes())
+        wf.setframerate(sample_rate)
+        wf.writeframes(array.tobytes())
         wf.close()
 
 
-def showWaveform(np_frames,time):
+# Produce waveform 
 
-    plt.title('Output Waveform')
+def show_waveform(array,time):
+
+    plt.title('Waveform')
     plt.xlabel('Time')
     plt.ylabel('Amplitude')
-    plt.plot(time, np_frames)
+    plt.plot(time, array)
     plt.show()
+
+
+# Create and visualise fft for recorded audio
+
+from numpy.fft import fft
+
+def show_fft(array,sr):
+   X = fft(array) 
+   N = len(X)
+   n = np.arange(N)
+   T = N/sr
+   freq = n/T
+
+   plt.figure().set_figwidth(12)
+   plt.plot(freq, np.abs(X))
+   plt.title('Fast Fourier Transform (FFT) of Output')
+   plt.xlabel('Frequency (Hz)')
+   plt.ylabel('Amplitude (dB)')
+   plt.xscale('log')
+   plt.show()
+
+
+# Create and visualise spectrogram for recorded audio using STFT
+
+from scipy.signal import stft
+from scipy.signal.windows import gaussian
+
+def show_spectrogram(array,sr,window,nperseg):
+    freqs, times, stft_array = stft(array,sr,window=window,nperseg=nperseg) # nperseg = segment size (makes sense to make it same as chunk)
+    print(len(stft_array))
+
+    
+
