@@ -1,6 +1,7 @@
 import numpy as np
 import pyaudio 
 import wave
+import matplotlib.pyplot as plt
 
 # Instance variables
 
@@ -8,7 +9,6 @@ CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
-
 filename = 'output.wav'
 
 
@@ -40,7 +40,9 @@ def recordAudio(seconds):
     
     byte_frames = b''.join(frames_list) # Converts the frames list into bytes object
     np_frames = np.frombuffer(byte_frames, dtype=np.int16) # Converts bytes object into np array (for input into FFT)
-        
+    
+    duration = len(np_frames) / RATE
+    time = np.linspace(0, duration, num=len(np_frames))
 
     stream.stop_stream() 
     stream.close() # Stops and closes stream
@@ -59,11 +61,13 @@ def recordAudio(seconds):
     wf.close()
     '''
     
-    return np_frames, RATE
+    return np_frames, RATE, time
 
     # Minor discrepancy in number of frames recorded - 44032 frames for a 44100 sr over 1 second
 
+
 # Function for export and playing back audio
+
 def playbackAudio(np_frames, RATE):
 
     with wave.open('output.wav', 'wb') as wf:
@@ -72,3 +76,12 @@ def playbackAudio(np_frames, RATE):
         wf.setframerate(RATE)
         wf.writeframes(np_frames.tobytes())
         wf.close()
+
+
+def showWaveform(np_frames,time):
+
+    plt.title('Output Waveform')
+    plt.xlabel('Time')
+    plt.ylabel('Amplitude')
+    plt.plot(time, np_frames)
+    plt.show()
