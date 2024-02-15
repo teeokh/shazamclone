@@ -114,17 +114,17 @@ def show_fft(array,sr):
 from scipy.signal import stft
 from scipy.signal.windows import gaussian
 
-def show_spectrogram(array,sr,window,nperseg):
-    # nperseg = segment size (makes sense to make it same as chunk)
+def show_spectrogram(array,sr,window,nperseg,noverlap):
+    # nperseg = segment size / window size (larger = more frequency resolution, smaller = more time resolution)
     # stft_array will be half of chunk size + 1 (as Nyquist frequency is half of sampled frequency + the first DC component (0 Hz))
-    freqs, times, stft_array = stft(array,sr,window=window,nperseg=nperseg) 
+    freqs, times, stft_array = stft(array,sr,window=window,nperseg=nperseg,noverlap=noverlap) #stft_array = ndarray
 
     max_power = np.max(np.abs(stft_array)**2)
     stft_power_db = 10 * np.log10((np.abs(stft_array)**2 + 1e-10) / max_power)
 
     # Create colormesh (for time against frequency) and colorbar (for amplitude)
     plt.figure().set_figwidth(12)
-    plt.pcolormesh(times, freqs, stft_power_db, shading='gouraud') # Spectrogram is the magnitude of STFT array, squared
+    plt.pcolormesh(times, freqs, stft_power_db, shading='gouraud', vmin=-80,cmap='inferno') # Spectrogram is the magnitude of STFT array, squared
     plt.colorbar(label='Intensity (dB)')
 
     plt.xlabel('Time')
@@ -132,7 +132,3 @@ def show_spectrogram(array,sr,window,nperseg):
     plt.title('Spectrogram')
     plt.ylim(0, sr/2)
     plt.show()
-
-
-    
-
